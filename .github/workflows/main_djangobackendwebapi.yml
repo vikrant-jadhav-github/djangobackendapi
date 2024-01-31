@@ -58,5 +58,5 @@ jobs:
       
       - name: Deploy to Azure Web App
         run: |
-          cd path/to/server/url_shortner_backend
+          cd djangobackendapi/server/url_shortner_backend
           gunicorn wsgi:application --bind 0.0.0.0:8000
