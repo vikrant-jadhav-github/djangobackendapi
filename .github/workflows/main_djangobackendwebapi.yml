@@ -62,7 +62,7 @@ jobs:
         run: pip install gunicorn
 
       - name: Start Gunicorn server
-        run: gunicorn myproject.wsgi:application --bind 0.0.0.0:8000 --workers 4
+        run: gunicorn server.wsgi:application --bind 0.0.0.0:8000 --workers 4
       
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
