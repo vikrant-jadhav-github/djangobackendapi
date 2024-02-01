@@ -1,4 +1,4 @@
-name: Build and deploy Python app to Azure Web App - djangobackendwebapi
+name: Build and deploy Python app to Azure Web App - djangobackendapi
 
 on:
   push:
@@ -11,16 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up Python version
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.12'
+          python-version: '3.x'
 
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      
       - name: Install dependencies
         run: |
-          pip install django gunicorn
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start Gunicorn server
+        run: |
+          cd server/url_shortner_backend
+          gunicorn wsgi:application --bind 0.0.0.0:8000
 
   deploy:
     runs-on: ubuntu-latest
@@ -31,22 +43,16 @@ jobs:
     
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: python-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
-      - name: Run Gunicorn
-        run: |
-          cd server/url_shortner_backend
-          gunicorn wsgi:application --bind 0.0.0.0:8000
+        run: unzip -o deployment.zip
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
         with:
-          app-name: 'djangobackendwebapi'
+          app-name: 'djangobackendapi'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2BB03D84CAF442D1A2D896AA123F7EEB }}
